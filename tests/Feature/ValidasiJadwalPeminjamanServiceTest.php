@@ -25,6 +25,9 @@ class ValidasiJadwalPeminjamanServiceTest extends TestCase
             $t->time('jam_selesai');
             $t->string('status_peminjaman');
         });
+        Schema::create('ruangan', function (Blueprint $t) {
+            $t->increments('id_ruangan');
+        });
         Schema::create('penutupan_ruangan', function (Blueprint $t) {
             $t->increments('id_penutupan');
             $t->unsignedInteger('id_ruangan');
@@ -171,5 +174,24 @@ class ValidasiJadwalPeminjamanServiceTest extends TestCase
 
         $this->assertTrue($this->validasi('09:00', '11:00', 1, [$j => 3], $idPem)['valid']);
         $this->assertFalse($this->validasi('09:00', '11:00', 1, [$j => 3])['valid']);
+    }
+
+    public function test_validasi_dengan_kunci_menolak_jika_bukan_di_dalam_transaksi(): void
+    {
+        $this->expectException(\LogicException::class);
+        (new ValidasiJadwalPeminjamanService())->validasiDenganKunci(self::TGL, '09:00', '11:00', 1);
+    }
+
+    public function test_validasi_dengan_kunci_di_dalam_transaksi_hasilnya_sama(): void
+    {
+        $j = $this->jenisDenganUnit(2);
+        $hasil = DB::transaction(fn () => (new ValidasiJadwalPeminjamanService())
+            ->validasiDenganKunci(self::TGL, '09:00', '11:00', 1, [$j => 2]));
+
+        $this->assertTrue($hasil['valid']);
+
+        $gagal = DB::transaction(fn () => (new ValidasiJadwalPeminjamanService())
+            ->validasiDenganKunci(self::TGL, '09:00', '11:00', 1, [$j => 3]));
+        $this->assertSame('alat', $gagal['tahap']);
     }
 }
