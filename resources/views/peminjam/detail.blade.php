@@ -1,190 +1,193 @@
 @extends('layouts.peminjam')
 
-@section('title', 'Detail Pengajuan | SIPRAP')
-@section('breadcrumb', 'Peminjam / Status Pengajuan / Detail')
+@section('title', 'Detail Pengajuan Peminjaman | SIPRAP')
+@section('breadcrumb', 'Peminjam / Detail')
 
 @section('content')
 <style>
-    .card-detail-box {
+    .card-custom {
         background: #ffffff;
         border: 1px solid #e2e8f0;
-        border-radius: 14px;
-        padding: 24px;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+        border-radius: 16px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
     }
-    .timeline-dot {
-        width: 18px;
-        height: 18px;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 0.65rem;
+    .badge-status-pill {
+        border-radius: 50px;
+        padding: 6px 16px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        display: inline-block;
     }
 </style>
 
-<div class="d-flex justify-content-between align-items-center mb-4">
+<div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
     <div>
         <h3 class="fw-bold text-dark m-0" style="font-size: 1.55rem;">Detail Pengajuan</h3>
-        <p class="text-secondary small m-0">{{ $detail->no_pengajuan }}</p>
+        <!-- Kode format ID Peminjaman aman dari error -->
+        <p class="text-secondary small m-0">
+            Nomor Pengajuan: <strong class="text-dark">#PJ-{{ str_pad($detail->id_peminjaman, 4, '0', STR_PAD_LEFT) }}</strong>
+        </p>
     </div>
     <div class="d-flex gap-2">
         <a href="/peminjam/riwayat" class="btn btn-outline-secondary rounded-3 px-3 py-2 fw-semibold" style="font-size: 0.85rem;">
-            Kembali
+            <i class="bi bi-arrow-left me-1"></i> Kembali
         </a>
+        @php
+            $st = strtolower($detail->status_peminjaman ?? ($detail->status ?? 'menunggu'));
+        @endphp
+        @if($st === 'menunggu')
         <button type="button" class="btn btn-outline-danger rounded-3 px-3 py-2 fw-semibold" data-bs-toggle="modal" data-bs-target="#modalBatal" style="font-size: 0.85rem;">
-            Batalkan Pengajuan
+            <i class="bi bi-x-circle me-1"></i> Batalkan Pengajuan
         </button>
+        @endif
     </div>
 </div>
 
+@if(session('success'))
+<div class="alert alert-success alert-dismissible fade show rounded-3 small mb-4 py-2 px-3 d-flex align-items-center gap-2">
+    <i class="bi bi-check-circle-fill"></i>
+    <span>{{ session('success') }}</span>
+    <button type="button" class="btn-close ms-auto p-2" data-bs-dismiss="alert"></button>
+</div>
+@endif
+
 <div class="row g-4">
-    <!-- KOLOM KIRI: RINCIAN INFORMASI -->
+    <!-- KOLOM KIRI: STATUS & INFORMASI RUANGAN -->
     <div class="col-lg-8">
-        <div class="card-detail-box mb-4">
-            <h6 class="fw-bold text-dark mb-3">Informasi Peminjaman</h6>
-            <div class="row g-3 small mb-3">
-                <div class="col-md-3">
-                    <span class="text-secondary d-block">No. Pengajuan</span>
-                    <strong class="text-dark">{{ $detail->no_pengajuan }}</strong>
-                </div>
-                <div class="col-md-3">
-                    <span class="text-secondary d-block">Diajukan</span>
-                    <strong class="text-dark">{{ $detail->waktu_pengajuan }}</strong>
-                </div>
-                <div class="col-md-6">
-                    <span class="text-secondary d-block">Peminjam</span>
-                    <strong class="text-dark">{{ $detail->pemohon }}</strong>
-                </div>
-                <div class="col-md-3">
-                    <span class="text-secondary d-block">Ruangan</span>
-                    <strong class="text-dark">{{ $detail->ruangan }}</strong>
-                </div>
-                <div class="col-md-4">
-                    <span class="text-secondary d-block">Jadwal</span>
-                    <strong class="text-dark">{{ $detail->jadwal }}</strong>
-                </div>
-                <div class="col-md-5">
-                    <span class="text-secondary d-block">Keperluan</span>
-                    <strong class="text-dark">{{ $detail->keperluan }}</strong>
+        <div class="card-custom p-4 mb-4">
+            <div class="d-flex justify-content-between align-items-center border-bottom pb-3 mb-3">
+                <h6 class="fw-bold text-dark m-0">Informasi Ruangan & Waktu</h6>
+                <div>
+                    @if($st === 'disetujui')
+                        <span class="badge rounded-pill bg-info-subtle text-info px-3 py-1 fw-semibold">Disetujui</span>
+                    @elseif($st === 'dipinjam')
+                        <span class="badge rounded-pill bg-purple-subtle text-primary px-3 py-1 fw-semibold">Sedang Dipinjam</span>
+                    @elseif($st === 'selesai' || $st === 'dikembalikan')
+                        <span class="badge rounded-pill bg-success-subtle text-success px-3 py-1 fw-semibold">Selesai Dikembalikan</span>
+                    @elseif($st === 'ditolak' || $st === 'dibatalkan')
+                        <span class="badge rounded-pill bg-danger-subtle text-danger px-3 py-1 fw-semibold">Ditolak / Dibatalkan</span>
+                    @else
+                        <span class="badge rounded-pill bg-warning-subtle text-warning px-3 py-1 fw-semibold">Menunggu Persetujuan</span>
+                    @endif
                 </div>
             </div>
-            <div class="p-2 px-3 rounded-2 small text-secondary" style="background: #f8fafc; border: 1px solid #edf2f7;">
-                {{ $detail->fasilitas_ruangan }}
+
+            <div class="row g-3 small">
+                <div class="col-md-6">
+                    <span class="text-secondary d-block mb-1">Laboratorium yang Diajukan</span>
+                    <strong class="text-dark fs-6">{{ $detail->nama_ruangan ?? 'Laboratorium Komputer' }}</strong>
+                </div>
+                <div class="col-md-6">
+                    <span class="text-secondary d-block mb-1">Nama Pemohon</span>
+                    <strong class="text-dark fs-6">{{ $detail->pemohon ?? session('nama') }}</strong>
+                </div>
+                <div class="col-md-6">
+                    <span class="text-secondary d-block mb-1">Waktu Mulai Praktikum</span>
+                    <span class="text-dark fw-semibold">
+                        {{ $detail->tanggal_mulai ?? ($detail->tanggal_peminjaman ?? $detail->created_at) }}
+                    </span>
+                </div>
+                <div class="col-md-6">
+                    <span class="text-secondary d-block mb-1">Waktu Selesai Praktikum</span>
+                    <span class="text-dark fw-semibold">
+                        {{ $detail->tanggal_selesai ?? '-' }}
+                    </span>
+                </div>
+                <div class="col-12 mt-3">
+                    <span class="text-secondary d-block mb-1">Keperluan / Deskripsi Praktikum</span>
+                    <div class="p-3 rounded-3 bg-light text-dark">
+                        {{ $detail->keperluan ?? '-' }}
+                    </div>
+                </div>
+
+                @if($st === 'ditolak' && ($detail->catatan_penolakan || $detail->alasan_penolakan))
+                <div class="col-12 mt-3">
+                    <span class="text-danger d-block mb-1 fw-semibold"><i class="bi bi-info-circle me-1"></i> Alasan Penolakan</span>
+                    <div class="p-3 rounded-3 bg-danger-subtle text-danger">
+                        {{ $detail->catatan_penolakan ?? $detail->alasan_penolakan }}
+                    </div>
+                </div>
+                @endif
             </div>
         </div>
 
-        <!-- TABEL BARANG YANG DIPINJAM -->
-        <div class="card-detail-box mb-4">
-            <h6 class="fw-bold text-dark mb-3">Item yang Dipinjam</h6>
+        <!-- DAFTAR ALAT PRAKTIKUM YANG DIMINTA -->
+        <div class="card-custom p-4">
+            <h6 class="fw-bold text-dark mb-3">Daftar Peralatan Penunjang Praktikum</h6>
             <div class="table-responsive">
-                <table class="table align-middle m-0 small">
+                <table class="table align-middle m-0" style="font-size: 0.88rem;">
                     <thead>
-                        <tr class="text-secondary" style="font-size: 0.75rem; border-bottom: 2px solid #f1f5f9;">
-                            <th>Item</th>
-                            <th>Jumlah</th>
-                            <th>Kondisi Awal</th>
+                        <tr class="text-secondary" style="font-size: 0.78rem; border-bottom: 2px solid #f1f5f9;">
+                            <th>Nama Peralatan</th>
+                            <th class="text-center" style="width: 140px;">Jumlah Pinjam</th>
+                            <th class="text-center" style="width: 140px;">Status Ketersediaan</th>
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach($detail->alat as $item)
+                        @forelse($alat as $item)
                         <tr>
-                            <td class="fw-semibold text-dark">{{ $item->nama }}</td>
-                            <td>{{ $item->jumlah }}</td>
-                            <td class="text-secondary">{{ $item->kondisi_awal }}</td>
+                            <td>
+                                <strong class="text-dark">{{ $item->nama_alat ?? 'Unit Peralatan' }}</strong>
+                            </td>
+                            <td class="text-center fw-semibold text-dark">
+                                {{ $item->jumlah ?? ($item->jumlah_alat ?? 1) }} unit
+                            </td>
+                            <td class="text-center">
+                                <span class="badge bg-success-subtle text-success px-3 py-1 rounded-pill small">Tersedia</span>
+                            </td>
                         </tr>
-                        @endforeach
+                        @empty
+                        <tr>
+                            <td colspan="3" class="text-center py-4 text-secondary small">
+                                <i class="bi bi-box-seam fs-3 d-block text-muted mb-2"></i>
+                                Tidak ada peralatan tambahan yang dipinjam pada sesi ini.
+                            </td>
+                        </tr>
+                        @endforelse
                     </tbody>
                 </table>
             </div>
         </div>
-
-        <!-- BERKAS DOKUMEN -->
-        <div class="card-detail-box">
-            <h6 class="fw-bold text-dark mb-3">Dokumen Pendukung</h6>
-            <div class="border rounded-3 p-3 d-flex justify-content-between align-items-center">
-                <div class="d-flex align-items-center gap-3">
-                    <div style="width: 38px; height: 38px; border-radius: 8px; background: #eff6ff; color: #2563eb;" class="d-flex align-items-center justify-content-center">
-                        <i class="bi bi-file-earmark-pdf"></i>
-                    </div>
-                    <div>
-                        <span class="d-block fw-bold text-dark small">{{ $detail->dokumen }}</span>
-                        <small class="text-muted" style="font-size: 0.72rem;">Proposal pengajuan peminjaman laboratorium</small>
-                    </div>
-                </div>
-                <a href="#" class="btn btn-outline-primary btn-sm rounded-pill px-3 py-1 fw-semibold" style="font-size: 0.8rem;">
-                    Lihat
-                </a>
-            </div>
-        </div>
     </div>
 
-    <!-- KOLOM KANAN: STATUS & LINIMASA -->
+    <!-- KOLOM KANAN: PANDUAN PENGAMBILAN & SERAH TERIMA -->
     <div class="col-lg-4">
-        <div class="card-detail-box">
-            <h6 class="fw-bold text-dark mb-3">Status Pengajuan</h6>
-
-            <!-- Timeline Step 1: Diajukan -->
-            <div class="d-flex gap-3 mb-4 position-relative">
-                <div class="timeline-dot bg-success text-white"><i class="bi bi-check"></i></div>
-                <div>
-                    <h6 class="fw-bold text-dark m-0" style="font-size: 0.85rem;">Diajukan</h6>
-                    <small class="text-secondary" style="font-size: 0.72rem;">23 Okt 2026 · 09.10</small>
-                </div>
+        <div class="card-custom p-4">
+            <h6 class="fw-bold text-dark mb-3">Ketentuan Pengambilan</h6>
+            <div class="p-3 rounded-3 mb-3" style="background: #eff6ff; border: 1px solid #bfdbfe;">
+                <small class="text-primary d-block fw-semibold mb-1">
+                    <i class="bi bi-info-circle me-1"></i> Pengambilan Kunci & Alat
+                </small>
+                <small class="text-secondary" style="font-size: 0.75rem;">
+                    Setelah status berubah menjadi <strong>Disetujui</strong>, peminjam dapat mengambil kunci dan alat di ruang laboran 15 menit sebelum kegiatan dimulai[cite: 20].
+                </small>
             </div>
-
-            <!-- Timeline Step 2: Verifikasi Laboran -->
-            <div class="d-flex gap-3 mb-4">
-                <div class="timeline-dot bg-warning text-dark"><i class="bi bi-hourglass-split"></i></div>
-                <div>
-                    <h6 class="fw-bold text-dark m-0" style="font-size: 0.85rem;">Verifikasi Laboran</h6>
-                    <small class="text-warning fw-semibold d-block" style="font-size: 0.72rem;">Menunggu keputusan</small>
-                </div>
-            </div>
-
-            <!-- Timeline Step 3: Keputusan -->
-            <div class="d-flex gap-3 mb-4 opacity-50">
-                <div class="timeline-dot bg-light border text-secondary"><i class="bi bi-circle"></i></div>
-                <div>
-                    <h6 class="fw-semibold text-dark m-0" style="font-size: 0.85rem;">Keputusan</h6>
-                    <small class="text-secondary" style="font-size: 0.72rem;">Disetujui / Ditolak</small>
-                </div>
-            </div>
-
-            <!-- Timeline Step 4: Dipinjam -->
-            <div class="d-flex gap-3 mb-4 opacity-50">
-                <div class="timeline-dot bg-light border text-secondary"><i class="bi bi-circle"></i></div>
-                <div>
-                    <h6 class="fw-semibold text-dark m-0" style="font-size: 0.85rem;">Dipinjam</h6>
-                    <small class="text-secondary" style="font-size: 0.72rem;">Serah-terima kunci & alat</small>
-                </div>
-            </div>
-
-            <!-- Timeline Step 5: Dikembalikan -->
-            <div class="d-flex gap-3 opacity-50">
-                <div class="timeline-dot bg-light border text-secondary"><i class="bi bi-circle"></i></div>
-                <div>
-                    <h6 class="fw-semibold text-dark m-0" style="font-size: 0.85rem;">Dikembalikan</h6>
-                    <small class="text-secondary" style="font-size: 0.72rem;">Pemeriksaan kondisi akhir</small>
-                </div>
+            <div class="p-3 rounded-3" style="background: #f8fafc; border: 1px solid #e2e8f0;">
+                <small class="text-dark d-block fw-semibold mb-1">
+                    <i class="bi bi-clipboard-check me-1"></i> Pemeriksaan Kondisi
+                </small>
+                <small class="text-secondary" style="font-size: 0.75rem;">
+                    Petugas laboran akan mencatat kondisi fasilitas pada saat serah-terima dan pengembalian[cite: 9].
+                </small>
             </div>
         </div>
     </div>
 </div>
 
-<!-- MODAL BATALKAN PENGAJUAN (PERSIS FIGMA) -->
+<!-- MODAL BATALKAN PENGAJUAN (F4-06 / F5-06) -->
 <div class="modal fade" id="modalBatal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered" style="max-width: 400px;">
-        <div class="modal-content rounded-4 border-0 p-4 text-center">
-            <div style="width: 54px; height: 54px; border-radius: 50%; background: #fee2e2; color: #dc2626;" class="d-flex align-items-center justify-content-center mx-auto mb-3 fs-4">
-                <i class="bi bi-exclamation-triangle"></i>
-            </div>
-            <h5 class="fw-bold text-dark mb-1">Batalkan Pengajuan {{ $detail->no_pengajuan }}?</h5>
-            <p class="text-secondary small mb-4">Pengajuan hanya dapat dibatalkan selama belum diverifikasi laboran. Status akan berubah menjadi Dibatalkan.</p>
-            <div class="d-flex gap-2 justify-content-center">
-                <button type="button" class="btn btn-light rounded-3 px-3 py-2 fw-semibold w-50" data-bs-dismiss="modal">Tidak, kembali</button>
-                <button type="button" class="btn btn-danger rounded-3 px-3 py-2 fw-semibold w-50">Ya, Batalkan</button>
-            </div>
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content rounded-4 border-0 p-3 text-center">
+            <div class="text-danger mb-2"><i class="bi bi-exclamation-circle fs-1"></i></div>
+            <h6 class="fw-bold text-dark mb-1">Batalkan Pengajuan?</h6>
+            <p class="text-secondary small mb-3">Pengajuan peminjaman ini akan dibatalkan dari sistem laboratorium[cite: 9].</p>
+            <form action="/peminjam/pengajuan/{{ $detail->id_peminjaman }}/batal" method="POST">
+                @csrf
+                <div class="d-flex justify-content-center gap-2">
+                    <button type="button" class="btn btn-light rounded-3 px-3 py-1 small" data-bs-dismiss="modal">Tutup</button>
+                    <button type="submit" class="btn btn-danger rounded-3 px-3 py-1 small">Ya, Batalkan</button>
+                </div>
+            </form>
         </div>
     </div>
 </div>

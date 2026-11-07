@@ -4,10 +4,19 @@
 @section('breadcrumb', 'Laboran / Verifikasi Pengajuan')
 
 @section('content')
+<style>
+    .card-custom {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 16px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+    }
+</style>
+
 <div class="d-flex justify-content-between align-items-center mb-4">
     <div>
         <h3 class="fw-bold text-dark m-0" style="font-size: 1.55rem;">Verifikasi Pengajuan</h3>
-        <p class="text-secondary small m-0">Daftar permohonan peminjaman ruangan dan alat yang menunggu persetujuan laboran.</p>
+        <p class="text-secondary small m-0">Daftar permohonan peminjaman ruangan dan alat yang menunggu evaluasi laboran.</p>
     </div>
 </div>
 
@@ -46,8 +55,8 @@
                 <tr>
                     <td class="fw-bold text-dark">#PJ-{{ str_pad($item->id_peminjaman, 4, '0', STR_PAD_LEFT) }}</td>
                     <td>
-                        <strong class="text-dark d-block">{{ $item->pemohon }}</strong>
-                        <small class="text-secondary" style="font-size: 0.72rem;">{{ $item->keperluan }}</small>
+                        <strong class="text-dark d-block">{{ $item->pemohon ?? ($item->peminjam ?? '-') }}</strong>
+                        <small class="text-secondary" style="font-size: 0.72rem;">{{ $item->keperluan ?? '-' }}</small>
                     </td>
                     <td class="fw-semibold text-dark">{{ $item->nama_ruangan ?? 'Laboratorium' }}</td>
                     <td class="text-secondary">{{ $item->tanggal_mulai }}</td>
@@ -56,7 +65,9 @@
                         <span class="badge rounded-pill bg-warning-subtle text-warning px-3 py-1">Menunggu</span>
                     </td>
                     <td class="text-end">
-                        <a href="/laboran/verifikasi/{{ $item->id_peminjaman }}" class="btn btn-primary btn-sm rounded-pill px-3 py-1 fw-semibold" style="background-color: #2563eb; font-size: 0.8rem;">Periksa</a>
+                        <a href="/laboran/verifikasi/{{ $item->id_peminjaman }}" class="btn btn-primary btn-sm rounded-pill px-3 py-1 fw-semibold" style="background-color: #2563eb; font-size: 0.8rem;">
+                            Periksa
+                        </a>
                     </td>
                 </tr>
                 @empty

@@ -5,6 +5,12 @@
 
 @section('content')
 <style>
+    .card-custom {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 16px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+    }
     .card-stat-figma {
         background: #ffffff;
         border: 1px solid #e2e8f0;
@@ -79,7 +85,7 @@
             <div class="border rounded-3 p-3 mb-2 d-flex justify-content-between align-items-center">
                 <div>
                     <strong class="text-dark d-block small">#PJ-{{ str_pad($item->id_peminjaman, 4, '0', STR_PAD_LEFT) }} · {{ $item->nama_ruangan ?? 'Lab' }}</strong>
-                    <small class="text-secondary" style="font-size: 0.72rem;">{{ $item->peminjam }} · {{ $item->keperluan }}</small>
+                    <small class="text-secondary" style="font-size: 0.72rem;">{{ $item->pemohon ?? ($item->peminjam ?? 'Civitas') }} · {{ $item->keperluan ?? '-' }}</small>
                 </div>
                 <a href="/laboran/verifikasi/{{ $item->id_peminjaman }}" class="btn btn-primary btn-sm rounded-pill px-3 py-1" style="font-size: 0.78rem; background-color: #2563eb;">Periksa</a>
             </div>
@@ -98,8 +104,8 @@
             @forelse($pengembalian_hari_ini as $ret)
             <div class="border rounded-3 p-3 mb-2 d-flex justify-content-between align-items-center">
                 <div>
-                    <strong class="text-dark d-block small">{{ $ret->nama_ruangan }}</strong>
-                    <small class="text-secondary" style="font-size: 0.72rem;">{{ $ret->peminjam }}</small>
+                    <strong class="text-dark d-block small">{{ $ret->nama_ruangan ?? 'Lab' }}</strong>
+                    <small class="text-secondary" style="font-size: 0.72rem;">{{ $ret->pemohon ?? ($ret->peminjam ?? 'Civitas') }}</small>
                 </div>
                 <a href="/laboran/pengembalian" class="btn btn-outline-secondary btn-sm rounded-pill px-3 py-1" style="font-size: 0.78rem;">Proses</a>
             </div>

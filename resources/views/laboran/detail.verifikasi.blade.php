@@ -4,12 +4,23 @@
 @section('breadcrumb', 'Laboran / Verifikasi / Periksa')
 
 @section('content')
+<style>
+    .card-custom {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 16px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+    }
+</style>
+
 <div class="d-flex justify-content-between align-items-center mb-4">
     <div>
         <h3 class="fw-bold text-dark m-0" style="font-size: 1.55rem;">Pemeriksaan Pengajuan #PJ-{{ str_pad($detail->id_peminjaman, 4, '0', STR_PAD_LEFT) }}</h3>
         <p class="text-secondary small m-0">Periksa detail permohonan sebelum memberi keputusan persetujuan atau penolakan.</p>
     </div>
-    <a href="/laboran/verifikasi" class="btn btn-outline-secondary rounded-3 px-3 py-2 fw-semibold small">Kembali</a>
+    <a href="/laboran/verifikasi" class="btn btn-outline-secondary rounded-3 px-3 py-2 fw-semibold small">
+        <i class="bi bi-arrow-left me-1"></i> Kembali
+    </a>
 </div>
 
 <div class="row g-4">
@@ -19,7 +30,7 @@
             <div class="row g-3 small">
                 <div class="col-md-6">
                     <span class="text-secondary d-block">Nama Pemohon</span>
-                    <strong class="text-dark">{{ $detail->pemohon }}</strong>
+                    <strong class="text-dark">{{ $detail->pemohon ?? '-' }}</strong>
                 </div>
                 <div class="col-md-6">
                     <span class="text-secondary d-block">Email Pemohon</span>
@@ -27,11 +38,11 @@
                 </div>
                 <div class="col-md-6">
                     <span class="text-secondary d-block">Ruangan Laboratorium</span>
-                    <strong class="text-dark">{{ $detail->nama_ruangan }}</strong>
+                    <strong class="text-dark">{{ $detail->nama_ruangan ?? '-' }}</strong>
                 </div>
                 <div class="col-md-6">
                     <span class="text-secondary d-block">Keperluan Kegiatan</span>
-                    <strong class="text-dark">{{ $detail->keperluan }}</strong>
+                    <strong class="text-dark">{{ $detail->keperluan ?? '-' }}</strong>
                 </div>
                 <div class="col-md-6">
                     <span class="text-secondary d-block">Waktu Mulai</span>
@@ -51,16 +62,16 @@
                     <thead>
                         <tr class="text-secondary" style="border-bottom: 2px solid #f1f5f9;">
                             <th>Nama Alat</th>
-                            <th>Jumlah</th>
-                            <th>Kondisi Terakhir</th>
+                            <th class="text-center" style="width: 120px;">Jumlah</th>
+                            <th class="text-center" style="width: 140px;">Kondisi Terakhir</th>
                         </tr>
                     </thead>
                     <tbody>
                         @forelse($alat as $item)
                         <tr>
                             <td class="fw-semibold text-dark">{{ $item->nama_alat }}</td>
-                            <td>{{ $item->jumlah ?? 1 }} unit</td>
-                            <td class="text-success"><i class="bi bi-check-circle me-1"></i>{{ ucfirst($item->kondisi ?? 'Baik') }}</td>
+                            <td class="text-center">{{ $item->jumlah ?? 1 }} unit</td>
+                            <td class="text-center text-success"><i class="bi bi-check-circle me-1"></i>{{ ucfirst($item->kondisi ?? 'Baik') }}</td>
                         </tr>
                         @empty
                         <tr>

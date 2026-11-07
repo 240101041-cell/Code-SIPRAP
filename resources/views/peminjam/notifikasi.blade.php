@@ -1,107 +1,108 @@
 @extends('layouts.peminjam')
 
-@section('title', 'Notifikasi | SIPRAP')
+@section('title', 'Pusat Notifikasi | SIPRAP')
 @section('breadcrumb', 'Peminjam / Notifikasi')
 
 @section('content')
 <style>
-    .card-custom {
+    .card-notif {
         background: #ffffff;
         border: 1px solid #e2e8f0;
-        border-radius: 16px;
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
-    }
-    .notif-item {
-        border-bottom: 1px solid #f1f5f9;
-        padding: 16px 20px;
+        border-radius: 14px;
+        padding: 18px 20px;
+        transition: all 0.2s ease;
+        text-decoration: none;
         display: flex;
-        align-items: flex-start;
+        align-items: center;
+        justify-content: space-between;
         gap: 16px;
     }
-    .notif-item:last-child {
-        border-bottom: none;
+    .card-notif:hover {
+        background-color: #f8fafc;
+        border-color: #cbd5e1;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
     }
-    .notif-icon {
-        width: 40px;
-        height: 40px;
+    .icon-notif-circle {
+        width: 44px;
+        height: 44px;
         border-radius: 50%;
         display: flex;
         align-items: center;
         justify-content: center;
+        font-size: 1.15rem;
         flex-shrink: 0;
-        font-size: 1.1rem;
     }
 </style>
 
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <div>
-        <h3 class="fw-bold text-dark m-0" style="font-size: 1.55rem;">Pusat Notifikasi</h3>
-        <p class="text-secondary small m-0">Pembaruan status verifikasi, persetujuan, dan pengingat peminjaman fasilitas Anda.</p>
-    </div>
+<div class="mb-4">
+    <h3 class="fw-bold text-dark m-0" style="font-size: 1.55rem;">Pusat Notifikasi</h3>
+    <p class="text-secondary small m-0">Pembaruan status verifikasi, persetujuan, dan pengingat peminjaman fasilitas Anda.</p>
 </div>
 
-<div class="card-custom">
-    @forelse($notifikasi as $notif)
-    <div class="notif-item">
-        @if($notif->status === 'disetujui')
-            <div class="notif-icon bg-success-subtle text-success">
-                <i class="bi bi-check2-circle"></i>
+<div class="d-flex flex-column gap-3">
+    @forelse($notifikasi as $n)
+        @php
+            $st = strtolower($n->status_peminjaman ?? ($n->status ?? 'menunggu'));
+            $waktu = \Carbon\Carbon::parse($n->updated_at ?? $n->created_at)->translatedFormat('d M Y, H:i') . ' WIB';
+        @endphp
+
+        <a href="/peminjam/detail/{{ $n->id_peminjaman }}" class="card-notif">
+            <div class="d-flex align-items-center gap-3">
+                @if($st === 'disetujui')
+                    <div class="icon-notif-circle" style="background: #e0f2fe; color: #0284c7;">
+                        <i class="bi bi-check2-circle"></i>
+                    </div>
+                    <div>
+                        <h6 class="fw-bold text-dark m-0 mb-1">Pengajuan #PJ-{{ str_pad($n->id_peminjaman, 4, '0', STR_PAD_LEFT) }} Telah Disetujui</h6>
+                        <p class="text-secondary small m-0">Permohonan untuk <strong>{{ $n->nama_ruangan ?? 'Laboratorium' }}</strong> siap digunakan. Silakan ambil kunci ke Laboran.</p>
+                    </div>
+                @elseif($st === 'dipinjam')
+                    <div class="icon-notif-circle" style="background: #f3e8ff; color: #7e22ce;">
+                        <i class="bi bi-box-seam"></i>
+                    </div>
+                    <div>
+                        <h6 class="fw-bold text-dark m-0 mb-1">Fasilitas #PJ-{{ str_pad($n->id_peminjaman, 4, '0', STR_PAD_LEFT) }} Sedang Digunakan</h6>
+                        <p class="text-secondary small m-0">Kunci/alat untuk <strong>{{ $n->nama_ruangan ?? 'Laboratorium' }}</strong> telah diserahterimakan oleh petugas.</p>
+                    </div>
+                @elseif($st === 'ditolak')
+                    <div class="icon-notif-circle" style="background: #fee2e2; color: #dc2626;">
+                        <i class="bi bi-x-circle"></i>
+                    </div>
+                    <div>
+                        <h6 class="fw-bold text-dark m-0 mb-1">Pengajuan #PJ-{{ str_pad($n->id_peminjaman, 4, '0', STR_PAD_LEFT) }} Ditolak / Dibatalkan</h6>
+                        <p class="text-secondary small m-0">Pengajuan untuk <strong>{{ $n->nama_ruangan ?? 'Laboratorium' }}</strong> tidak dapat diproses.</p>
+                    </div>
+                @elseif($st === 'selesai' || $st === 'dikembalikan')
+                    <div class="icon-notif-circle" style="background: #dcfce7; color: #16a34a;">
+                        <i class="bi bi-check-all"></i>
+                    </div>
+                    <div>
+                        <h6 class="fw-bold text-dark m-0 mb-1">Peminjaman #PJ-{{ str_pad($n->id_peminjaman, 4, '0', STR_PAD_LEFT) }} Telah Selesai</h6>
+                        <p class="text-secondary small m-0">Fasilitas <strong>{{ $n->nama_ruangan ?? 'Laboratorium' }}</strong> telah dikembalikan dengan tertib.</p>
+                    </div>
+                @else
+                    <div class="icon-notif-circle" style="background: #fef3c7; color: #b45309;">
+                        <i class="bi bi-hourglass-split"></i>
+                    </div>
+                    <div>
+                        <h6 class="fw-bold text-dark m-0 mb-1">Pengajuan #PJ-{{ str_pad($n->id_peminjaman, 4, '0', STR_PAD_LEFT) }} Menunggu Verifikasi</h6>
+                        <p class="text-secondary small m-0">Permohonan untuk <strong>{{ $n->nama_ruangan ?? 'Laboratorium' }}</strong> sedang menunggu evaluasi petugas Laboran.</p>
+                    </div>
+                @endif
             </div>
-            <div class="flex-grow-1">
-                <div class="d-flex justify-content-between align-items-center mb-1">
-                    <strong class="text-dark small">Pengajuan #PJ-{{ str_pad($notif->id_peminjaman, 4, '0', STR_PAD_LEFT) }} Disetujui</strong>
-                    <small class="text-muted" style="font-size: 0.72rem;">{{ $notif->updated_at ?? $notif->created_at }}</small>
-                </div>
-                <p class="text-secondary small m-0">
-                    Permohonan untuk <strong>{{ $notif->nama_ruangan }}</strong> telah disetujui oleh Laboran. Silakan lakukan serah-terima kunci sesuai jadwal.
-                </p>
+
+            <div class="text-end flex-shrink-0">
+                <small class="text-secondary d-block" style="font-size: 0.78rem;">{{ $waktu }}</small>
+                <span class="text-primary small fw-semibold">Lihat Detail <i class="bi bi-chevron-right"></i></span>
             </div>
-        @elseif($notif->status === 'ditolak')
-            <div class="notif-icon bg-danger-subtle text-danger">
-                <i class="bi bi-x-circle"></i>
-            </div>
-            <div class="flex-grow-1">
-                <div class="d-flex justify-content-between align-items-center mb-1">
-                    <strong class="text-dark small">Pengajuan #PJ-{{ str_pad($notif->id_peminjaman, 4, '0', STR_PAD_LEFT) }} Ditolak</strong>
-                    <small class="text-muted" style="font-size: 0.72rem;">{{ $notif->updated_at ?? $notif->created_at }}</small>
-                </div>
-                <p class="text-secondary small m-0">
-                    Permohonan untuk <strong>{{ $notif->nama_ruangan }}</strong> ditolak. Alasan: <em>"{{ $notif->catatan_penolakan ?? 'Jadwal bertabrakan / syarat belum lengkap' }}"</em>.
-                </p>
-            </div>
-        @elseif($notif->status === 'dipinjam')
-            <div class="notif-icon bg-info-subtle text-primary">
-                <i class="bi bi-key"></i>
-            </div>
-            <div class="flex-grow-1">
-                <div class="d-flex justify-content-between align-items-center mb-1">
-                    <strong class="text-dark small">Kunci & Fasilitas Sedang Dipinjam</strong>
-                    <small class="text-muted" style="font-size: 0.72rem;">{{ $notif->updated_at ?? $notif->created_at }}</small>
-                </div>
-                <p class="text-secondary small m-0">
-                    Fasilitas <strong>{{ $notif->nama_ruangan }}</strong> telah diserahterimakan. Harap kembalikan tepat waktu sebelum jadwal praktikum berakhir.
-                </p>
-            </div>
-        @else
-            <div class="notif-icon bg-warning-subtle text-warning">
-                <i class="bi bi-hourglass-split"></i>
-            </div>
-            <div class="flex-grow-1">
-                <div class="d-flex justify-content-between align-items-center mb-1">
-                    <strong class="text-dark small">Pengajuan #PJ-{{ str_pad($notif->id_peminjaman, 4, '0', STR_PAD_LEFT) }} Menunggu Verifikasi</strong>
-                    <small class="text-muted" style="font-size: 0.72rem;">{{ $notif->created_at }}</small>
-                </div>
-                <p class="text-secondary small m-0">
-                    Permohonan untuk <strong>{{ $notif->nama_ruangan }}</strong> sedang menunggu evaluasi petugas Laboran.
-                </p>
-            </div>
-        @endif
-    </div>
+        </a>
     @empty
-    <div class="text-center py-5 text-secondary small">
-        <i class="bi bi-bell-slash fs-2 d-block text-muted mb-2"></i>
-        Belum ada notifikasi pembaruan untuk akun Anda.
-    </div>
+        <div class="card p-5 text-center border-0 rounded-4 shadow-sm">
+            <i class="bi bi-bell-slash fs-1 text-muted mb-2"></i>
+            <h6 class="fw-bold text-dark">Belum Ada Notifikasi</h6>
+            <p class="text-secondary small m-0">Semua aktivitas dan respon pengajuan Anda akan dicatat di sini.</p>
+        </div>
     @endforelse
 </div>
 @stop

@@ -5,6 +5,12 @@
 
 @section('content')
 <style>
+    .card-custom {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 16px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+    }
     .card-stat-figma {
         background: #ffffff;
         border: 1px solid #e2e8f0;
@@ -26,7 +32,7 @@
 <div class="d-flex justify-content-between align-items-center mb-4">
     <div>
         <h3 class="fw-bold text-dark m-0" style="font-size: 1.55rem;">Dashboard</h3>
-        <p class="text-secondary small m-0">Selamat datang, <strong>{{ session('nama') }}</strong>. Berikut ringkasan aktivitas peminjaman Anda.</p>
+        <p class="text-secondary small m-0">Selamat datang, <strong>{{ session('nama', 'Andi Pratama') }}</strong>. Berikut ringkasan aktivitas peminjaman Anda.</p>
     </div>
     <div class="d-flex gap-2">
         <a href="/peminjam/ketersediaan" class="btn btn-outline-secondary btn-sm px-3 py-2 rounded-3 fw-semibold">
@@ -87,6 +93,7 @@
 </div>
 
 <div class="row g-4">
+    <!-- TABEL AKTIVITAS PEMINJAMAN BERJALAN -->
     <div class="col-lg-8">
         <div class="card-custom p-4">
             <div class="d-flex justify-content-between align-items-center mb-3">
@@ -113,9 +120,12 @@
                             </td>
                             <td class="text-secondary">{{ $p->tanggal_mulai }} s/d {{ $p->tanggal_selesai }}</td>
                             <td class="text-center">
-                                @if($p->status === 'disetujui')
+                                @php
+                                    $st = strtolower($p->status ?? ($p->status_peminjaman ?? 'menunggu'));
+                                @endphp
+                                @if($st === 'disetujui')
                                     <span class="badge rounded-pill bg-info-subtle text-info px-3 py-1">Disetujui</span>
-                                @elseif($p->status === 'dipinjam')
+                                @elseif($st === 'dipinjam')
                                     <span class="badge rounded-pill bg-purple-subtle text-primary px-3 py-1">Dipinjam</span>
                                 @else
                                     <span class="badge rounded-pill bg-warning-subtle text-warning px-3 py-1">Menunggu</span>
@@ -139,16 +149,25 @@
         </div>
     </div>
 
+    <!-- INFORMASI TATA TERTIB (SESUAI DOKUMEN UAS) -->
     <div class="col-lg-4">
         <div class="card-custom p-4">
             <h6 class="fw-bold text-dark mb-3">Informasi Tata Tertib</h6>
             <div class="p-3 rounded-3 mb-3" style="background: #eff6ff; border: 1px solid #bfdbfe;">
-                <small class="text-primary d-block fw-semibold mb-1"><i class="bi bi-info-circle me-1"></i> Pengambilan Kunci</small>
-                <small class="text-secondary" style="font-size: 0.75rem;">Pengambilan kunci lab dilayani di Ruang Laboran maksimal 15 menit sebelum praktikum dimulai.</small>
+                <small class="text-primary d-block fw-semibold mb-1">
+                    <i class="bi bi-info-circle me-1"></i> Pengambilan Kunci & Alat
+                </small>
+                <small class="text-secondary" style="font-size: 0.75rem;">
+                    Pengambilan kunci lab dan unit alat dilayani di Ruang Laboran maksimal 15 menit sebelum waktu praktikum dimulai.
+                </small>
             </div>
             <div class="p-3 rounded-3" style="background: #fef2f2; border: 1px solid #fecaca;">
-                <small class="text-danger d-block fw-semibold mb-1"><i class="bi bi-exclamation-triangle me-1"></i> Sanksi Keterlambatan</small>
-                <small class="text-secondary" style="font-size: 0.75rem;">Keterlambatan pengembalian lebih dari 30 menit akan memicu sanksi pembekuan izin peminjaman.</small>
+                <small class="text-danger d-block fw-semibold mb-1">
+                    <i class="bi bi-check-circle me-1"></i> Ketertiban Pengembalian
+                </small>
+                <small class="text-secondary" style="font-size: 0.75rem;">
+                    Fasilitas ruangan dan peralatan praktikum wajib dikembalikan tepat waktu dalam kondisi bersih serta rapi kepada petugas laboran.
+                </small>
             </div>
         </div>
     </div>
